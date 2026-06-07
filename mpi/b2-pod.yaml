@@ -1,0 +1,68 @@
+# b2-pod.yaml — B-2 性能基准测试 Pod
+# 自动跑完：串行 3 次 + MPI 1P/2P/4P 各 3 次
+# 使用 time 命令获取真实总耗时（用于 Amdahl 分析）
+apiVersion: v1
+kind: Pod
+metadata:
+  name: b2-benchmark
+spec:
+  restartPolicy: Never
+  containers:
+  - name: mpi-bench
+    image: swr.cn-north-4.myhuaweicloud.com/yunjisuan26/mpi4py:latest
+    command: ["/bin/bash", "-c"]
+    args:
+    - |
+      echo "=============================================="
+      echo " B-2 Performance Benchmark"
+      echo " Trapezoidal Integration, N=100,000,000"
+      echo "=============================================="
+      echo ""
+      echo ">>> [1/4] Serial Baseline (3 runs) <<<"
+      for i in 1 2 3; do
+        echo "--- Serial #$i ---"
+        time python /scripts/trap_serial.py
+        echo ""
+      done
+      echo ""
+      echo ">>> [2/4] MPI 1 Process (3 runs) <<<"
+      for i in 1 2 3; do
+        echo "--- MPI-1P #$i ---"
+        time OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+          OMPI_MCA_rmaps_base_oversubscribe=1 mpirun -np 1 python /scripts/trap_mpi.py
+        echo ""
+      done
+      echo ""
+      echo ">>> [3/4] MPI 2 Processes (3 runs) <<<"
+      for i in 1 2 3; do
+        echo "--- MPI-2P #$i ---"
+        time OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+          OMPI_MCA_rmaps_base_oversubscribe=1 mpirun -np 2 python /scripts/trap_mpi.py
+        echo ""
+      done
+      echo ""
+      echo ">>> [4/4] MPI 4 Processes (3 runs) <<<"
+      for i in 1 2 3; do
+        echo "--- MPI-4P #$i ---"
+        time OMPI_ALLOW_RUN_AS_ROOT=1 OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+          OMPI_MCA_rmaps_base_oversubscribe=1 mpirun -np 4 python /scripts/trap_mpi.py
+        echo ""
+      done
+      echo ""
+      echo "=============================================="
+      echo " BENCHMARK COMPLETE"
+      echo "=============================================="
+    volumeMounts:
+    - name: scripts
+      mountPath: /scripts
+    resources:
+      requests:
+        cpu: 10m
+        memory: 16Mi
+      limits:
+        cpu: 4
+        memory: 2Gi
+  volumes:
+  - name: scripts
+    configMap:
+      name: mpi-scripts

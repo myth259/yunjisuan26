@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云计算课程设计</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #1a3a4a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e0e0e0;
+        }
+        .card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            max-width: 520px;
+        }
+        .card h1 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, #64b5f6, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card .subtitle {
+            color: #90caf9;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+        }
+        .info-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            font-size: 0.95rem;
+            color: #b0bec5;
+        }
+        .info-box strong { color: #e0e0e0; }
+        .status { color: #4caf50; font-weight: bold; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>☁️ 云计算技术课程设计</h1>
+        <p class="subtitle">Cloud Computing Course Project</p>
+        <div class="info-box">
+            <!-- ====== 任务1要求：替换为你的学号和姓名 ====== -->
+            <p>学号：<strong>2023112490</strong></p>
+            <p>姓名：<strong>张耀升</strong></p>
+            <!-- ============================================= -->
+        </div>
+        <div class="info-box">
+            <p>后端 API：<span id="api-status">检测中...</span></p>
+            <p>课程：SCAI004712 · 2026 春季学期</p>
+        </div>
+        <p class="status">🚀 部署成功 — Nginx + Flask + Redis on CCE</p>
+    </div>
+    <script>
+        // 前端通过 Nginx 反向代理访问后端 /api/ping
+        fetch('/api/ping')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('api-status').textContent =
+                    data.status === 'ok' ? '✅ 已连接' : '⚠️ 异常';
+            })
+            .catch(() => {
+                document.getElementById('api-status').textContent = '❌ 不可达';
+            });
+    </script>
+</body>
+</html>

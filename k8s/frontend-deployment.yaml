@@ -1,0 +1,41 @@
+# 前端 Nginx Deployment（任务5：ConfigMap Volume 挂载）
+# 将 nginx 配置文件以 Volume 形式挂载到 /etc/nginx/conf.d/default.conf
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+      - name: swr-secret
+      containers:
+      - name: frontend
+        # ====== 替换为你的 SWR 镜像地址 ======
+        image: swr.cn-north-4.myhuaweicloud.com/yunjisuan26/frontend:v1
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "32Mi"
+          limits:
+            cpu: "500m"
+            memory: "128Mi"
+        # 任务5：ConfigMap 以 Volume 形式挂载
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
